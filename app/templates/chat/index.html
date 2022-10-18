@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+</head>
+<body>
+
+
+<div class="container">
+    <center>
+        <h1> Group Name: <span id="group_name">{{group_name}}</span></h1></center>
+    <div class="row mt-4">
+        <center>
+
+
+            <div id="chat-log" class="col-8 border" style="height:500px; overflow: scroll;">
+                {% for chat in chats %}
+                {{chat.content}}
+                <br>
+                {% endfor %}
+            </div><br>
+            <div class="col-4">
+                <input type="text" id="chat-message-input" class="form-control" placeholder="type message...">
+                <input type="button" id="chat-message-submit" value="send" class="btn btn-primary mt-3">
+            </div>
+        </center>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+        crossorigin="anonymous"></script>
+
+
+<script>
+        const group_name = document.getElementById("group_name").textContent;
+
+
+        var ws = new WebSocket('ws://' + window.location.host + '/ws/wsc/' + group_name + '/')
+
+        ws.onopen = function(){
+            console.log(ws)
+        }
+        
+        ws.onmessage = function(event){
+            console.log('hello')
+            const data = JSON.parse(event.data)
+            console.log(data)
+            document.querySelector('#chat-log').innerHTML += (data.msg + '<br>')
+        }
+
+        ws.onclose = function(){
+            console.log('websocket connection close...');
+        }
+
+        document.getElementById('chat-message-submit').onclick = function(event){
+            const message = document.getElementById('chat-message-input');
+            ws.send(JSON.stringify({
+                'msg':message.value
+            }))
+            message.value = '';
+        }
+
+
+
+</script>
+
+
+</body>
+</html>
